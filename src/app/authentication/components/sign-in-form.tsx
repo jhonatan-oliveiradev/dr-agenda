@@ -23,23 +23,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { registerSchema } from "./schemas";
+import { loginSchema } from "./schemas";
 
-export default function SignUpForm() {
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+export default function SignInForm() {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
-    const { ...dataToSubmit } = values;
-
-    console.log("Dados a serem enviados:", dataToSubmit);
+  function onSubmit(values: z.infer<typeof loginSchema>) {
+    console.log("Dados de login:", values);
   }
 
   return (
@@ -47,31 +43,12 @@ export default function SignUpForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CardHeader>
-            <CardTitle>Crie sua conta</CardTitle>
+            <CardTitle>Faça login</CardTitle>
             <CardDescription>
-              Preencha os campos abaixo para criar sua conta e começar a usar o
-              sistema.
+              Entre com seu e-mail e senha para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Insira seu nome"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="email"
@@ -99,25 +76,7 @@ export default function SignUpForm() {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Insira uma senha forte"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirmar senha</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Insira novamente a senha"
+                      placeholder="Insira sua senha"
                       {...field}
                     />
                   </FormControl>
@@ -128,7 +87,7 @@ export default function SignUpForm() {
           </CardContent>
           <CardFooter>
             <Button className="w-full" type="submit">
-              Criar conta
+              Entrar
             </Button>
           </CardFooter>
         </form>
