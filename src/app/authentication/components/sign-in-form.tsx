@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Lock,Mail } from "lucide-react";
+import { Loader2, Lock, Mail } from "lucide-react";
 import { redirect, useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,12 +26,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 
 import { loginSchema } from "./schemas";
 
 export default function SignInForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -99,10 +102,11 @@ export default function SignInForm() {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Insira sua senha"
                         className="pl-9"
+                        showPassword={showPassword}
+                        onTogglePassword={() => setShowPassword(!showPassword)}
                         {...field}
                       />
                     </div>

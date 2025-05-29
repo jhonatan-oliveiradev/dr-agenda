@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, Mail, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,12 +26,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 
 import { registerSchema } from "./schemas";
 
 export default function SignUpForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -128,10 +132,11 @@ export default function SignUpForm() {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Insira uma senha forte"
                         className="pl-9"
+                        showPassword={showPassword}
+                        onTogglePassword={() => setShowPassword(!showPassword)}
                         {...field}
                       />
                     </div>
@@ -150,10 +155,11 @@ export default function SignUpForm() {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Insira novamente a senha"
                         className="pl-9"
+                        showPassword={showConfirmPassword}
+                        onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
                         {...field}
                       />
                     </div>
