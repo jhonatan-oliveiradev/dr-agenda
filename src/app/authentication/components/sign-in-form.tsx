@@ -1,7 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Lock,Mail } from "lucide-react";
+import { redirect, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -22,10 +25,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 import { loginSchema } from "./schemas";
 
 export default function SignInForm() {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,21 +40,34 @@ export default function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log("Dados de login:", values);
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: () => {
+          toast.error("E-mail ou senha inválidos!");
+        },
+      },
+    );
   }
 
   return (
-    <Card>
+    <Card className="border-none shadow-none">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <CardHeader>
-            <CardTitle>Faça login</CardTitle>
+          <CardHeader className="">
+            <CardTitle className="text-2xl">Entrar na sua conta</CardTitle>
             <CardDescription>
-              Entre com seu e-mail e senha para continuar.
+              Entre com seu e-mail e senha para acessar sua agenda
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <FormField
               control={form.control}
               name="email"
@@ -56,11 +75,15 @@ export default function SignInForm() {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Ex: usuario@email.com"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="Ex: usuario@email.com"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -74,20 +97,43 @@ export default function SignInForm() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Insira sua senha"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="password"
+                        placeholder="Insira sua senha"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
-          <CardFooter>
-            <Button className="w-full" type="submit">
-              Entrar
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+            <Button
+              variant="link"
+              className="w-full text-sm text-muted-foreground"
+              type="button"
+              onClick={() => {redirect("/")}}
+            >
+              Esqueceu sua senha?
             </Button>
           </CardFooter>
         </form>

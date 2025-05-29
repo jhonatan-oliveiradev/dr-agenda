@@ -1,7 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Lock, Mail, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -22,10 +25,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 import { registerSchema } from "./schemas";
 
 export default function SignUpForm() {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -36,36 +42,55 @@ export default function SignUpForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
-    const { ...dataToSubmit } = values;
-
-    console.log("Dados a serem enviados:", dataToSubmit);
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    await authClient.signUp.email(
+      {
+        email: values.email,
+        password: values.password,
+        name: values.name,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: (ctx) => {
+          if (ctx.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("E-mail já cadastrado!")
+          
+            return;
+          }
+        }
+      },
+    );
   }
 
   return (
-    <Card>
+    <Card className="border-none shadow-none">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CardHeader>
-            <CardTitle>Crie sua conta</CardTitle>
+            <CardTitle className="text-2xl">Crie sua conta</CardTitle>
             <CardDescription>
-              Preencha os campos abaixo para criar sua conta e começar a usar o
-              sistema.
+              Preencha os campos abaixo para começar a usar o Doctor Agenda.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome</FormLabel>
+                  <FormLabel>Nome completo</FormLabel>
                   <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Insira seu nome"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Insira seu nome completo"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,11 +104,15 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Ex: usuario@email.com"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="Ex: usuario@email.com"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,11 +126,15 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Insira uma senha forte"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="password"
+                        placeholder="Insira uma senha forte"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,20 +148,35 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Confirmar senha</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Insira novamente a senha"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        type="password"
+                        placeholder="Insira novamente a senha"
+                        className="pl-9"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
-          <CardFooter>
-            <Button className="w-full" type="submit">
-              Criar conta
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Criando conta...
+                </>
+              ) : (
+                "Criar conta"
+              )}
             </Button>
           </CardFooter>
         </form>
