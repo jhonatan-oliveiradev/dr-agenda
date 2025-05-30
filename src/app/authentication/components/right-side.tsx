@@ -9,7 +9,7 @@ export const RightSide = () => {
       <div className="w-full max-w-[400px] space-y-6">
         <div className="space-y-2 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Bem-vindo ao Doctor Agenda
+            Seja bem-vindo!
           </h2>
           <p className="text-muted-foreground text-sm">
             Acesse sua conta ou crie uma nova para começar
